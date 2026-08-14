@@ -208,12 +208,15 @@ void gfx_sdl_render_imgui(void) {
     igNewFrame();
 
     // 2. 悬浮菜单开关按钮（方便 Android 屏幕随时展开/收起菜单）
-    igSetNextWindowPos((ImVec2){10, 10}, ImGuiCond_FirstUseEver, (ImVec2){0, 0});
-    igBegin("MenuToggle", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground);
-    if (igButton(gDerectMenu ? "Close" : "Open", (ImVec2){100, 100})) {
+    // igSetNextWindowPos((ImVec2){10, 10}, ImGuiCond_FirstUseEver, (ImVec2){0, 0});
+    // igBegin("MenuToggle", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground);
+    // if (igButton(gDerectMenu ? "Close" : "Open", (ImVec2){100, 100})) {
+    //     gDerectMenu = !gDerectMenu;
+    // }
+    // igEnd();
+    if (igIsKeyPressed_Bool(ImGuiKey_RightAlt, false)) {
         gDerectMenu = !gDerectMenu;
     }
-    igEnd();
     
     Derect_RenderHUD();  // Hud
     Module_Render();     // Moduless
@@ -221,6 +224,11 @@ void gfx_sdl_render_imgui(void) {
     // 3. 渲染 Vape V4 主界面
     if (gDerectMenu) {
         derect_panel_render(&gDerectMenu);
+        igGetIO()->WantCaptureMouse = true;
+        igGetIO()->WantCaptureKeyboard = true;
+    } else {
+        igGetIO()->WantCaptureMouse = false;
+        igGetIO()->WantCaptureKeyboard = false;
     }
 
     // 4. 提交 cimgui 渲染数据到 OpenGL ES

@@ -28,6 +28,8 @@
 #include "hud.h"
 #include "pc/controller/controller_mouse.h"
 
+#include "pc/derect/module.h"
+
 // FIXME: I'm not sure all of these variables belong in this file, but I don't
 // know of a good way to split them
 
@@ -606,6 +608,8 @@ void game_loop_one_iteration(void) {
         //block_until_rumble_pak_free();
         osContStartReadData(&gSIEventMesgQueue);
     }
+
+    Module_Update();
 
     thread6_rumble_loop(NULL);
     audio_game_loop_tick();
