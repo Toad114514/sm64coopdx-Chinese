@@ -2,8 +2,9 @@
 #include <math.h>
 #include <stdio.h>
 
+#define GL_GLEXT_PROTOTYPES 1 // 旧的gl
 #include <GL/gl.h>
-#include <GL/gl2ext.h>
+#include <GL/glext.h>
 
 #ifndef CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS

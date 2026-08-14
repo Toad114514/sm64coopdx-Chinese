@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#define KEYBIND_CONFIG_PATH "/storage/emulated/0/com.toad1145.derectcoopdxcn/config.ini"
+#define KEYBIND_CONFIG_PATH "config.ini"
 
 static void parse_shortcut(const char* shortcut, int* out_key, int* out_mods);
 

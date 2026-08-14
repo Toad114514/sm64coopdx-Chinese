@@ -90,9 +90,11 @@ void derect_panel_render(bool* p_open) {
 
     // ================= Render 分类窗口 =================
     
-    float start_x = 50.0f;
-    float start_y = 70.0f;
+    float start_x = 20.0f;
+    float start_y = 35.0f;
     float panel_width = 300.0f; // 每个面板间隔宽度
+
+    //printf("CLICKGUI Opening...");
 
     for (int cat = 0; cat < CAT_COUNT; cat++) {
         ImVec2 panel_pos = (ImVec2){start_x + cat * panel_width, start_y};

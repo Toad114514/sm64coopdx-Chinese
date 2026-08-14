@@ -1154,7 +1154,7 @@ test: $(ROM)
 load: $(ROM)
 	$(LOADER) $(LOADER_FLAGS) $<
 
-libultra: $(BUILD_DIR)/libultra.a
+libultra: $(BUILD_DIR)/libultra.asm
 
 $(BUILD_DIR)/$(RPC_LIBS):
 	@$(CP) -f $(RPC_LIBS) $(BUILD_DIR)

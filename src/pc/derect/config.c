@@ -262,6 +262,6 @@ void Config_RenderOptions(const ConfigOption options[], int count) {
 
     // 只要有任意配置改动，立刻自动写入文件
     if (changed) {
-        Config_Save("/storage/emulated/0/com.toad1145.derectcoopdxcn/config.ini");
+        Config_Save("config.ini");
     }
 }

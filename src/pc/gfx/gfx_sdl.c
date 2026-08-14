@@ -36,6 +36,19 @@
 #include "../configfile.h"
 #include "../cliopts.h"
 
+// cimgui
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+#define CIMGUI_USE_OPENGL3
+#define CIMGUI_USE_SDL2
+#include "../cimgui/cimgui.h"
+#include "../cimgui/cimgui_impl.h"
+// derect init
+#include "../derect/ui.h"
+#include "../derect/style.h"
+#include "../derect/hud.h"
+#include "../derect/module.h"
+#include "../derect/config.h"
+
 #include "pc/controller/controller_keyboard.h"
 #include "pc/controller/controller_sdl.h"
 #include "pc/controller/controller_bind_mapping.h"
@@ -65,6 +78,9 @@ static void (*kb_text_editing)(char*, int) = NULL;
 
 static void (*m_scroll)(float, float) = NULL;
 
+static bool gInitedImgui = false;
+static bool gDerectMenu = false;
+
 #define IS_FULLSCREEN() ((SDL_GetWindowFlags(wnd) & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)
 
 static inline void gfx_sdl_set_vsync(const bool enabled) {
@@ -84,6 +100,135 @@ static void gfx_sdl_set_fullscreen(void) {
         configWindow.exiting_fullscreen = true;
     }
 }
+
+///////////////////// Derect ImGUI Render
+void InitLogging(void) {
+    FILE* log_file = freopen("game.log", "w", stdout);
+    if (!log_file) {
+        // 如果是在 Android 等系统，建议使用绝对可写路径，例如:
+        freopen("game.log", "w", stdout);
+    }
+
+    // 2. 将 stderr (错误输出) 也重定向到日志文件
+    freopen("game_err.log", "w", stderr);
+
+    // 3. 关键步骤：关闭缓冲区（或设为行缓冲）
+    // 默认文件输出是全缓冲的，若程序崩溃可能导致未写入日志；禁用缓冲可确保 printf 立即写入文件
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
+}
+
+void Derect_InitFont(void) {
+    ImGuiIO* io = igGetIO();
+    
+    const char* font_path = "lang/yahei.ttf";
+
+    // glyph Unicode...::
+    static const ImWchar glyph_ranges[] = {
+        0x0020, 0x00FF, // english
+        0x2000, 0x206F, // 常用标点
+        0x3000, 0x30FF, // CJK 符号/标点
+        0x4E00, 0x9FAF, // CJK 统一汉字
+        0xFF00, 0xFFEF, // 全角与半角
+        0,  // EOF
+    };
+    
+    // load font
+    printf("[Derect] Loading %s \n", font_path);
+    ImFont* custom_font = ImFontAtlas_AddFontFromFileTTF(
+        io->Fonts,
+        font_path,
+        26.0f,
+        NULL,
+        glyph_ranges // unicode range
+    );
+
+    // check loaded
+    if (!custom_font) {
+        printf("[Derect] TTF load failed!\n");
+        ImFontAtlas_AddFontDefault(io->Fonts, NULL);
+    } else {
+        printf("[Derect] Successfully loaded TTF Font\n");
+    }
+}
+
+void derect_initImgui(SDL_Window* window, SDL_GLContext gl_context) {
+    InitLogging();
+    Config_Load("config.ini");
+    
+    if (gInitedImgui) return;
+
+    // 1. 创建 cimgui 上下文
+    igCreateContext(NULL);
+    
+    ImGuiIO* io = igGetIO();
+    io->ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
+    
+    Derect_InitFont(); // custom font
+    derect_initStyle();
+    
+    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
+    ImGui_ImplOpenGL3_Init("#version 300 es");
+
+    gInitedImgui = true;
+}
+
+bool gfx_sdl_handle_event_imgui(const SDL_Event* event) {
+    if (!gInitedImgui) return false;
+
+    // 1. 将 SDL 事件交给 cimgui 处理
+    ImGui_ImplSDL2_ProcessEvent(event);
+
+    ImGuiIO* io = igGetIO();
+
+    // break
+    if (io->WantCaptureMouse) {
+        switch (event->type) {
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+            case SDL_MOUSEMOTION:
+            case SDL_FINGERDOWN:
+            case SDL_FINGERUP:
+            case SDL_FINGERMOTION:
+                return true;
+            default:
+                break;
+        }
+    }
+
+    return false; 
+}
+
+void gfx_sdl_render_imgui(void) {
+    if (!gInitedImgui) return;
+
+    // 1. 启动 cimgui 新帧
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    igNewFrame();
+
+    // 2. 悬浮菜单开关按钮（方便 Android 屏幕随时展开/收起菜单）
+    igSetNextWindowPos((ImVec2){10, 10}, ImGuiCond_FirstUseEver, (ImVec2){0, 0});
+    igBegin("MenuToggle", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground);
+    if (igButton(gDerectMenu ? "Close" : "Open", (ImVec2){100, 100})) {
+        gDerectMenu = !gDerectMenu;
+    }
+    igEnd();
+    
+    Derect_RenderHUD();  // Hud
+    Module_Render();     // Moduless
+
+    // 3. 渲染 Vape V4 主界面
+    if (gDerectMenu) {
+        derect_panel_render(&gDerectMenu);
+    }
+
+    // 4. 提交 cimgui 渲染数据到 OpenGL ES
+    igRender();
+    ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
+}
+
+//////////////// End
 
 static void gfx_sdl_reset_dimension_and_pos(void) {
     if (configWindow.exiting_fullscreen) {
@@ -151,6 +296,9 @@ static void gfx_sdl_init(const char *window_title) {
     if (configWindow.fullscreen) {
         SDL_ShowCursor(SDL_DISABLE);
     }
+
+    // init inject imgui
+    derect_initImgui(wnd, ctx);
 
     controller_bind_init();
 }
@@ -245,6 +393,11 @@ static void gfx_sdl_ondropfile(char* path) {
 static void gfx_sdl_handle_events(void) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        //imgui
+        if (gfx_sdl_handle_event_imgui(&event)) {
+            continue;
+        }
+
         switch (event.type) {
             case SDL_TEXTINPUT:
                 kb_text_input(event.text.text);
@@ -312,6 +465,7 @@ static bool gfx_sdl_start_frame(void) {
 }
 
 static void gfx_sdl_swap_buffers_begin(void) {
+    gfx_sdl_render_imgui();
     SDL_GL_SwapWindow(wnd);
 }
 

@@ -64,6 +64,8 @@
 
 #include "pc/mumble/mumble.h"
 
+#include "derect/module.h"
+
 #if defined(_WIN32)
 #include <windows.h>
 #endif
@@ -526,6 +528,7 @@ int main(int argc, char *argv[]) {
     fs_init(gCLIOpts.savePath[0] ? gCLIOpts.savePath : sys_user_path());
 #endif
 
+    Module_InitRegistry();
     configfile_load();
 
     legacy_folder_handler();

@@ -4,6 +4,7 @@
 #include "game/level_update.h"
 #include "surface_terrains.h"
 #include "engine/surface_collision.h"
+#include "engine/math_util.h"
 #include "types.h"
 #include "sm64.h"
 //#include "PR/os_cont.h"
@@ -311,9 +312,9 @@ static void fp_disable(void) {
 void moon_flyer_loop(void) {
     struct MarioState* m = &gMarioStates[0];
     
-    if (m && (m->controller->buttonDown & L_TRIG) != 0) {
-        m->faceAngle[1] = m->intendedYaw - approach_s32(s16(m.intendedYaw - m.faceAngle[1]), 0, 0x800, 0x800);
-        m.vel[1] = 40;
+    if (m != NULL && (m->controller->buttonDown & L_TRIG) != 0) {
+        m->faceAngle[1] = m->intendedYaw - approach_s32((s16)(m->intendedYaw - m->faceAngle[1]), 0, 0x800, 0x800);
+        m->vel[1] = 40;
         
         switch (m->action) {
             case ACT_FORWARD_GROUND_KB:
@@ -341,7 +342,7 @@ void module_mario_state(void){
     Module_HookConfig("MultipleSpeed", speed_config);
     Config_RegisterModuleOptions("MultipleSpeed", s_speed_config, SPEEDX_COUNT);
     
-    Module_Register("MoonFlyer",  CAT_MARIO, false, NULL, gree, NULL, NULL, moon_flyer_loop);
+    Module_Register("MoonFlyer",  CAT_MARIO, false, NULL, green, NULL, NULL, moon_flyer_loop);
     
     Module_Register("InfWCap",    CAT_MARIO, false, NULL, MOD_COLOR_RED,   NULL, inf_wing_cap_disable,    inf_wing_cap_loop);
     Module_Register("InfMCap",    CAT_MARIO, false, NULL, MOD_COLOR_GREEN, NULL, inf_metal_cap_disable,   inf_metal_cap_loop);
