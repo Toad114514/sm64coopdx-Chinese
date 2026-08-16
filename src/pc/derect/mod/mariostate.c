@@ -116,8 +116,12 @@ static void adf_config(void) {
 
 // jsksksmmdmdlx check
 static bool adf_is_dangerous(s16 type) {
+    if (adf_all) {
+        return true;
+    }
+
     // 岩浆 / 流沙
-    if (adf_lavas) {
+    if (adf_lavas && !adf_all) {
         switch (type) {
             case SURFACE_BURNING:
             case SURFACE_DEEP_QUICKSAND:
@@ -135,7 +139,7 @@ static bool adf_is_dangerous(s16 type) {
     }
     
     // 滑地
-    if (adf_slipper) {
+    if (adf_slipper && !adf_all) {
         switch (type) {
             case SURFACE_SLIPPERY:
             case SURFACE_VERY_SLIPPERY:
@@ -153,7 +157,7 @@ static bool adf_is_dangerous(s16 type) {
     }
 
     // 陈死亡区域
-    if (adf_death_plane) {
+    if (adf_death_plane && !adf_all) {
         switch (type) {
             case SURFACE_DEATH_PLANE:
             case SURFACE_VERTICAL_WIND:

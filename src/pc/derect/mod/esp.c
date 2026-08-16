@@ -10,6 +10,12 @@
 #include "game/level_update.h"
 #include "game/mario.h"
 #include "pc/network/network_player.h"
+#include "pc/lua/smlua_utils.h"
+#include "pc/lua/utils/smlua_obj_utils.h"
+#include "pc/djui/djui_console.h"
+#include "behavior_table.h"
+#include "object_fields.h"
+#include "engine/math_util.h"
 #include "../module.h"
 
 #define DEG2RAD(angle) ((angle) * 3.14159265358979323846f / 180.0f)
@@ -173,8 +179,59 @@ void Mario_ESP_Render(void) {
     }
 }
 
+void Object_ESP(void) {
+    struct MarioState* m = &gMarioStates[0];
+    float mPos[3] = { m->pos[1], m->pos[2], m->pos[3] };
+
+    ImDrawList* drawList = igGetForegroundDrawList_ViewportPtr(NULL);
+
+    for (int i = 0; i < NUM_OBJ_LISTS; i++) {
+        struct Object* obj = obj_get_first(i);
+
+        int countf = 0;
+        
+        while (obj) {
+            ESPScrPos scrpos;
+
+            const char* bhvname = get_behavior_name_from_id(get_id_from_behavior(obj->behavior));
+            float objpos[3] = { obj->oPosX, obj->oPosY, obj->oPosZ };
+
+            float dx = objpos[1] - mPos[1];
+            float dy = objpos[2] - mPos[2];
+            float dz = objpos[3] - mPos[3];
+            float dist = sqrt(dx*dx + dy*dy + dz*dz);
+
+            if (true) {
+                    WorldToScreen(objpos, &scrpos);
+
+                    ImDrawList_AddCircle(
+                        drawList,
+                        (ImVec2){scrpos.x, scrpos.y},
+                        1.00f,
+                        IM_COL32(255,255,255,255),
+                        0,
+                        2.0f
+                    );
+
+                    ImDrawList_AddText_Vec2(
+                        drawList,
+                        (ImVec2){scrpos.x, scrpos.y},
+                        IM_COL32(255,255,255,255),
+                        bhvname,
+                        NULL
+                    );
+            }
+
+            obj = obj_get_next(obj);
+        }    
+    }
+}
+
 // Module Register
 void module_esp(void){
     Module_Register("PlayerESP", CAT_RENDER, false, NULL, MOD_COLOR_GREEN, NULL, NULL, NULL);
     Module_HookRender("PlayerESP", Mario_ESP_Render);
+
+    Module_Register("bhvPosESP", CAT_RENDER, false, NULL, MOD_COLOR_GREEN, NULL, NULL, NULL);
+    Module_HookRender("bhvPosESP", Object_ESP);
 }
