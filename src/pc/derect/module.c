@@ -14,7 +14,7 @@ Module g_modules[MAX_MODULES];
 int g_module_count = 0;
 
 static const char* g_category_names[] = {
-    "Core", "Mario", "Render", "Control", "Coopnet/Web", "Misc", "Demo"
+    "Core", "Mario", "Render", "Control", "Coopnet/Web", "Behaviors", "Misc", "Demo"
 };
 
 const char* Module_GetCategoryName(ModuleCategory cat) {
@@ -114,6 +114,8 @@ extern void module_esp(void);
 extern void module_bgblur(void);
 extern void module_network(void);
 extern void module_autobowser(void);
+extern void module_core(void);
+extern void module_bhv(void);
 
 // 统一在此处注册所有游戏/应用模块
 void Module_InitRegistry(void) {
@@ -128,6 +130,8 @@ void Module_InitRegistry(void) {
     module_bgblur();
     module_network();
     module_autobowser();
+    module_core();
+    module_bhv();
 
     // ==================== 1. Render 分类 ====================
     Module_Register("Arraylist",       CAT_RENDER, true,  NULL,       green, NULL, NULL, NULL);

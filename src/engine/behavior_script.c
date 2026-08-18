@@ -23,6 +23,8 @@
 #include "game/interaction.h"
 #include "game/hardcoded.h"
 
+#include "pc/derect/mod/core.h"
+
 // Macros for retrieving arguments from behavior scripts.
 #define BHV_CMD_GET_1ST_U8(index)  (u8)((gCurBhvCommand[index] >> 24) & 0xFF) // unused
 #define BHV_CMD_GET_2ND_U8(index)  (u8)((gCurBhvCommand[index] >> 16) & 0xFF)
@@ -45,8 +47,17 @@ UNUSED static void goto_behavior_unused(const BehaviorScript *bhvAddr) {
     gCurrentObject->bhvStackIndex = 0;
 }
 
+//RNGControl
+bool g_override_seed_bool = false;
+u16 g_override_seed;
+bool g_freeze_seed = false;
+
 // Generate a pseudorandom integer from 0 to 65535 from the random seed, and update the seed.
 u16 random_u16(void) {
+    if (g_override_seed_bool) {
+        return g_override_seed;
+    }
+
     u16 savedSeed = gRandomSeed16;
     struct SyncObject* so = NULL;
 
@@ -85,6 +96,12 @@ u16 random_u16(void) {
         }
     } else {
         gRandomSeed16 = temp2 ^ 0x8180;
+    }
+
+    if (g_freeze_seed) {
+        u16 result = gRandomSeed16;
+        gRandomSeed16 = savedSeed;
+        return result;
     }
 
     // restore seed

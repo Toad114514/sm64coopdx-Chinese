@@ -1,5 +1,7 @@
 // bobomb.c.inc
 
+#include "pc/derect/mod/bhv.h"
+
 static struct ObjectHitbox sBobombHitbox = {
     .interactType = INTERACT_GRABBABLE,
     .downOffset = 0,
@@ -148,7 +150,7 @@ void generic_bobomb_free_loop(void) {
 
     bobomb_check_interactions();
 
-    if (o->oBobombFuseTimer >= 151)
+    if (o->oBobombFuseTimer >= bobomb_get_timer())
         o->oAction = BOBOMB_ACT_EXPLODE;
 }
 
@@ -194,7 +196,7 @@ void bobomb_held_loop(void) {
     cur_obj_set_pos_relative(player, 0, 60.0f, 100.0);
 
     o->oBobombFuseLit = 1;
-    if (o->oBobombFuseTimer >= 151) {
+    if (o->oBobombFuseTimer >= bobomb_get_timer()) {
         //! Although the Bob-omb's action is set to explode when the fuse timer expires,
         //  bobomb_act_explode() will not execute until the bob-omb's held state changes.
         //  This allows the Bob-omb to be regrabbed indefinitely.

@@ -16,11 +16,12 @@
 
 // 模块分类定义
 typedef enum {
-    CAT_CORE = 0,
+    CAT_CORE,
     CAT_MARIO,
     CAT_RENDER,
     CAT_CONTROL,
     CAT_WEB,
+    CAT_BHV,
     CAT_MISC,
     CAT_DEMO,
     CAT_COUNT

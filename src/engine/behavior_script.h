@@ -19,6 +19,10 @@
 
 #define obj_and_int(object, offset, value) object->OBJECT_FIELD_S32(offset) &= (s32)(value)
 
+extern bool g_freeze_seed;
+extern bool g_override_seed_bool;
+extern u16 g_override_seed;
+
 /* |description|Generates a pseudo random integer between 0 and 65535|descriptionEnd| */
 u16 random_u16(void);
 /* |description|Generates a pseudo random float between 0.0 and 1.0|descriptionEnd| */

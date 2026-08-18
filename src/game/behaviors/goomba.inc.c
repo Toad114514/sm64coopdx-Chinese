@@ -5,6 +5,8 @@
  * The triplet spawner comes before its spawned goombas in processing order.
  */
 
+#include "pc/derect/mod/bhv.h"
+
 /**
  * Hitbox for goomba.
  */
@@ -82,7 +84,7 @@ void bhv_goomba_triplet_spawner_update(void) {
         // is not used in the game
         dAngle =
             0x10000
-            / (((o->oBehParams2ndByte & GOOMBA_TRIPLET_SPAWNER_BP_EXTRA_GOOMBAS_MASK) >> 2) + 3);
+            / (((o->oBehParams2ndByte & GOOMBA_TRIPLET_SPAWNER_BP_EXTRA_GOOMBAS_MASK) >> 2) + gspawn_get_count());
 
         for (angle = 0, goombaFlag = 1 << 8; angle < 0xFFFF; angle += dAngle, goombaFlag <<= 1) {
             // Only spawn goombas which haven't been killed yet

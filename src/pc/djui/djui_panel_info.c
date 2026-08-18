@@ -9,7 +9,7 @@ void djui_panel_info_create(struct DjuiBase *caller) {
     struct DjuiThreePanel *panel = djui_panel_menu_create(DLANG(INFORMATION, INFORMATION_TITLE), false);
     struct DjuiBase *body = djui_three_panel_get_body(panel);
     {
-        snprintf(sInfo, 512, "Welcome to using Derect Client!\n本客户端仅用于学习使用，禁止用于非法盈利、违法行为！\n请在24小时内删除本资源！\n\n本客户端基于上善若、梅塔的长名字的汉化版本 1.0.1");
+        snprintf(sInfo, 512, "Welcome to using Derect Client!\nbytoadXtech64\nThanks Dear ImGUI/cimgui Library (both MIT Lisence)\n\n本客户端仅用于学习使用，禁止用于非法盈利、违法行为！\n请在24小时内删除本资源！\n此客户端完全遵守Minecraft EULA协议\n\n本客户端基于上善若、梅塔的长名字的汉化版本 1.0.1");
 
         struct DjuiText* text = djui_text_create(body, sInfo);
         djui_base_set_location(&text->base, 0, 0);
